@@ -118,24 +118,64 @@ stages:
           severities: 'CRITICAL,HIGH'
           exitCode: '0'
 
-      # - task: replacetokens@4
-      #   inputs:
-      #     rootDirectory: '$(Build.SourcesDirectory)/.cd'
-      #     targetFiles: '**/*.yml'
-      #     encoding: 'auto'
-      #     tokenPattern: 'default'
-      #     writeBOM: true
-      #     actionOnMissing: 'warn'
-      #     keepToken: false
-      #     actionOnNoFiles: 'continue'
-      #     enableTransforms: false
-      #     useLegacyPattern: false
-      #     enableTelemetry: true
-      #   displayName: 'Replace variables'
-      #   condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.SourceBranchName'], 'develop')))
+      - task: replacetokens@5
+        inputs:
+          rootDirectory: '$(Build.SourcesDirectory)/.cd'
+          targetFiles: '**/*.yml'
+          encoding: 'auto'
+          tokenPattern: 'default'
+          writeBOM: true
+          actionOnMissing: 'warn'
+          keepToken: false
+          actionOnNoFiles: 'continue'
+          enableTransforms: false
+          useLegacyPattern: false
+          enableTelemetry: true
+        displayName: 'Replace variables'
 
-      # - task: PublishPipelineArtifact@1
-      #   condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.SourceBranchName'], 'develop')))
-      #   inputs:
-      #     artifactName: 'manifests'
-      #     path: '$(Build.SourcesDirectory)/.cd'
+      - task: PublishPipelineArtifact@1
+        inputs:
+          artifactName: 'manifests'
+          path: '$(Build.SourcesDirectory)/.cd'
+
+- stage: DeployTest
+  displayName: DeployTest
+  dependsOn: Build
+  jobs:
+  - deployment: DeployTest
+    displayName: DeployTest
+    environment: 'test'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: none
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              connectionType: 'kubernetesServiceConnection'
+              kubernetesServiceConnection: 'demotraining'
+              namespace: demo
+              manifests: |
+                $(System.ArtifactsDirectory)/manifests/deployment.yml
+                $(System.ArtifactsDirectory)/manifests/service.yml
+
+- stage: DeployProduction
+  displayName: DeployProduction
+  dependsOn: DeployTest
+  jobs:
+  - deployment: DeployProduction
+    displayName: DeployProduction
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              echo "Production"
