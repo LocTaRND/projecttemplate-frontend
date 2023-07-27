@@ -29,10 +29,6 @@ stages:
       steps:
       - checkout: self
 
-      - task: GitVersion@5
-        inputs:
-          versionSpec: '5.x'
-
       - task: NodeTool@0
         displayName: Use Node version
         inputs:
