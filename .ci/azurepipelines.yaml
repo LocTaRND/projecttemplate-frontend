@@ -13,6 +13,10 @@ pr:
     - main
     - develop
 
+variables:
+  - group: demo_var
+  - group: fe
+
 # Pool build
 pool:
   vmImage: 'ubuntu-latest'
