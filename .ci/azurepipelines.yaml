@@ -32,7 +32,6 @@ stages:
       - task: GitVersion@5
         inputs:
           versionSpec: '5.x'
-          targetPath: 'GitVersion.yml'
 
       - task: NodeTool@0
         displayName: Use Node version
