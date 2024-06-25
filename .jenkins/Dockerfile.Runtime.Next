@@ -2,10 +2,6 @@ ARG BASEIMG=custom-sdk-source
 ARG IMG_VERSION=lts
 FROM $BASEIMG:$IMG_VERSION as next-sdk
 
-ARG JFROG_AUTH_B64
-ARG JFROG_TOKEN_B64
-ARG JFROG_USER=zenfolio-build
-
 RUN yarn install --production --pure-lockfile;
 
 

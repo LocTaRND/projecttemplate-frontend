@@ -47,7 +47,7 @@ echo "BUILD CAUSE: ${currentBuild.buildCauses}"
 
 // Define job base name (without folders path in Jenkins)
 
-def generateZenfolioVersion() {
+def generateVersion() {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-build-username-password', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
         def zver = sh (script: "gitversion /showvariable PreReleaseLabel /url ${env.GIT_URL} /b ${env.BRANCH_NAME}  /u ${env.GIT_USERNAME} /p ${env.GIT_PASSWORD} /nocache", returnStdout: true)
         currentBuild.displayName = "${env.BUILD_ID}-${zver.toLowerCase().trim()}"
@@ -94,7 +94,7 @@ pipeline {
     }
 
     environment {
-        VERSION = "${(generateZenfolioVersion())}"
+        VERSION = "${(generateVersion())}"
         ngx_srv = "${ngx_srv}"
         frontendHost = "${frontendHost}"
         containerRegistry = "${containerRegistry}"
