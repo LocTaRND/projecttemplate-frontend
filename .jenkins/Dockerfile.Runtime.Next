@@ -1,0 +1,23 @@
+ARG BASEIMG=custom-sdk-source
+ARG IMG_VERSION=lts
+FROM $BASEIMG:$IMG_VERSION as next-sdk
+
+ARG JFROG_AUTH_B64
+ARG JFROG_TOKEN_B64
+ARG JFROG_USER=zenfolio-build
+
+RUN yarn install --production --pure-lockfile;
+
+
+FROM node:lts-alpine3.11 as final
+# Add Tini to terminate NextJS Gracefully. 
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
+
+WORKDIR /app
+COPY --from=next-sdk /src/node_modules ./node_modules
+COPY --from=next-sdk /src/.next ./.next
+COPY --from=next-sdk /src/next.config.js ./next.config.js
+
+EXPOSE 8080
+CMD ["node_modules/.bin/next", "start", "-p", "8080"]

@@ -1,0 +1,9 @@
+ARG BASEIMG=custom-sdk-source
+ARG IMG_VERSION=lts
+FROM $BASEIMG:$IMG_VERSION as react-test
+
+ADD https://github.com/PowerShell/PowerShell/releases/download/v6.2.4/powershell_6.2.4-1.debian.9_amd64.deb /tmp
+RUN apt-get update; apt-get install -y liblttng-ust0;dpkg -i /tmp/powershell_6.2.4-1.debian.9_amd64.deb; apt-get install -f -y;
+
+WORKDIR /src
+RUN CI=true yarn test:ci; 

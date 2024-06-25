@@ -1,0 +1,7 @@
+ARG BASEIMG=custom-sdk-source
+ARG IMG_VERSION=lts
+FROM $BASEIMG:$IMG_VERSION as react-build
+
+WORKDIR /src
+COPY . .
+RUN yarn build;

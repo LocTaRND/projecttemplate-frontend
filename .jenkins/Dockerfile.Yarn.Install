@@ -1,0 +1,10 @@
+ARG BASEIMG=node
+ARG IMG_VERSION=lts
+FROM $BASEIMG:$IMG_VERSION as install
+
+WORKDIR /src
+COPY package.json .
+COPY yarn.lock .
+COPY .npmrc .
+
+RUN yarn install --pure-lockfile;
